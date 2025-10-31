@@ -4,14 +4,13 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard: Square → Symmetric Organic 20-gon Morph")
+st.title("IV Chart Dashboard: Square → Organic Octagon Morph")
 
 # --- User input ---
-factor = st.slider("Morph Level (0 = Square, 100 = Organic 20-gon)", 0, 100, 0)
+factor = st.slider("Morph Level (0 = Square, 100 = Organic Octagon)", 0, 100, 0)
+smoothness = st.slider("Fractal Smoothness", 0, 100, 50)  # new control
 morph_strength = factor / 100
-
-# --- Fixed fractal smoothness ---
-smooth_strength = 23 / 100  # fixed at your preferred roughness
+smooth_strength = smoothness / 100
 
 # --- Constants ---
 num_points = 1500
@@ -25,30 +24,36 @@ def polygon_radius(theta, n_sides):
 
 # --- Base shapes ---
 r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
-r_poly = polygon_radius(theta, 20)  # use 20 sides now
-r_morph = (1 - morph_strength) * r_square + morph_strength * r_poly
+r_octagon = polygon_radius(theta, 8)
+r_morph = (1 - morph_strength) * r_square + morph_strength * r_octagon
 
-# --- Organic symmetric deformation ---
+# --- Organic “fractal” deformation ---
+base_freq = 3 + 3 * morph_strength
 detail_amp = 0.05 * morph_strength
-base_freq = 20  # enforce 20-fold symmetry for "petals"
 
-# Controlled random noise (seeded)
+# Random layered noise
 rng = np.random.default_rng(42)
-noise = rng.normal(0, 1, num_points)
-sigma = 2 + 60 * smooth_strength
-noise_smooth = gaussian_filter1d(noise, sigma=sigma)
-noise_smooth /= np.max(np.abs(noise_smooth))
-
-# Add symmetric harmonic modulation
-# ensures fractal noise respects 20-fold rotational symmetry
-harmonic = (
-    np.cos(base_freq * theta)
-    + 0.3 * np.sin(2 * base_freq * theta + np.pi / 5)
-    + 0.15 * np.cos(4 * base_freq * theta + np.pi / 3)
+noise = (
+    0.6 * rng.normal(0, 1, num_points)
+    + 0.3 * np.sin(2.3 * theta)
+    + 0.1 * np.cos(7.1 * theta + np.pi / 3)
 )
 
-# Mix symmetric and fractal terms
-r_detail = 1 + detail_amp * (0.7 * harmonic + 0.3 * noise_smooth)
+# Smooth based on smoothness slider
+# low smooth_strength → rough / fractal
+# high smooth_strength → soft / smooth
+sigma = 2 + 60 * smooth_strength  # gaussian blur width
+noise_smooth = gaussian_filter1d(noise, sigma=sigma)
+
+# Normalize
+noise_smooth /= np.max(np.abs(noise_smooth))
+
+# Combine waves + noise for “organic veins”
+r_detail = 1 + detail_amp * (
+    0.5 * np.cos(base_freq * theta)
+    + 0.25 * np.sin(1.7 * base_freq * theta + np.pi / 4)
+    + 0.25 * noise_smooth
+)
 
 r_final = r_morph * r_detail
 
