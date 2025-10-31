@@ -129,8 +129,8 @@ fig.add_trace(
 
 # --- Layout ---
 fig.update_layout(
-    width=500,
-    height=500,
+    width=300,
+    height=300,
     xaxis=dict(scaleanchor="y", visible=False),
     yaxis=dict(visible=False),
     showlegend=False,
