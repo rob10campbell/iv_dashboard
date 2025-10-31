@@ -3,27 +3,26 @@ import plotly.graph_objects as go
 import numpy as np
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard with Subtle Organic Deformation")
+st.title("IV Chart Dashboard with Deforming Outer Shape")
 
 # --- User input: deformation factor ---
 factor = st.slider("Deformation Level", 0, 10, 0)
 
 # --- Constants ---
 num_points = 400
-max_radius_iv = 0.5   # radius of IV chart (constant inner circle)
+max_radius_iv = 0.5  # radius of IV chart
 outer_base_radius = 1.0  # base half-width of square
 
 # --- 1. Generate square boundary (parametric form) ---
 theta = np.linspace(0, 2 * np.pi, num_points)
+# Convert polar angles to "square-like" radius using L∞ norm approximation
 r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
 
-# --- 2. Apply subtle, high-frequency deformation ---
-# Small amplitude, frequency increases with factor
-amplitude = 0.03  # 3% radial perturbation
-frequency = 4 + factor  # from 4 ripples to 14 at slider max
-
-r_deformed = r_square + amplitude * np.sin(frequency * theta)
-r_deformed = np.clip(r_deformed, max_radius_iv * 1.3, None)
+# --- 2. Apply deformation to square boundary ---
+# Add sinusoidal perturbation to corners, ensuring min radius > IV radius
+deformation = 0.15 * factor * np.sin(6 * theta)
+r_deformed = r_square * (1 + deformation)
+r_deformed = np.clip(r_deformed, max_radius_iv * 1.3, None)  # ensure inner circle fits
 
 x = r_deformed * np.cos(theta)
 y = r_deformed * np.sin(theta)
@@ -31,7 +30,7 @@ y = r_deformed * np.sin(theta)
 # --- 3. Create Plotly figure ---
 fig = go.Figure()
 
-# Outer deformed square
+# Outer deformed square shape
 fig.add_trace(
     go.Scatter(
         x=x,
@@ -48,7 +47,7 @@ num_sections = 6
 num_vars = 9
 num_levels = 5
 
-# Concentric circles
+# Concentric circles (radial bars)
 for j in range(1, num_levels + 1):
     r_ring = max_radius_iv * (j / num_levels)
     theta_ring = np.linspace(0, 2 * np.pi, 200)
