@@ -1,13 +1,14 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
+from noise import pnoise2  # pip install noise
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard: Square → Geometric Flower Morph")
+st.title("IV Chart Dashboard with Biomorphic Fractal Deformation")
 
 # --- User input: deformation factor ---
-factor = st.slider("Morph Level (0 = Square, 100 = Flower)", 0, 100, 0)
-morph_strength = factor / 100  # normalized [0, 1]
+factor = st.slider("Deformation Level (Complexity)", 0, 100, 0)  # visual 0–100
+fractal_strength = 3 * (factor / 100) ** 1.5  # internal 0–3 range
 
 # --- Constants ---
 num_points = 500
@@ -16,24 +17,34 @@ outer_base_radius = 1.0
 
 theta = np.linspace(0, 2 * np.pi, num_points)
 
-# --- Start as square (in polar coordinates) ---
+# --- Start with a SQUARE in polar coordinates ---
 r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
 
-# --- Target shape: geometric “flower” pattern ---
-# Uses cos(4θ) to generate 4-lobed symmetry from the square's sides
-r_flower = outer_base_radius * (1 + 0.1 * np.cos(4 * theta) + 0.05 * np.cos(8 * theta))
+# --- Perlin noise–based deformation (biomorphic) ---
+def perlin_biomorphic_radius(theta, base_r, strength):
+    # smooth deformation that increases with strength
+    r = np.zeros_like(theta)
+    for i, t in enumerate(theta):
+        # sample Perlin noise field with circular mapping
+        nx, ny = np.cos(t) * (1.5 + strength), np.sin(t) * (1.5 + strength)
+        r[i] = base_r[i] * (1 + 0.15 * strength * pnoise2(nx, ny, octaves=3))
+    return r
 
-# --- Interpolate between square and flower ---
-r_morph = (1 - morph_strength) * r_square + morph_strength * r_flower
+r_deformed = perlin_biomorphic_radius(theta, r_square, fractal_strength)
 
-# --- Convert to Cartesian coordinates ---
-x = r_morph * np.cos(theta)
-y = r_morph * np.sin(theta)
+# --- Roundening: transition from square → circular biomorphic ---
+roundness = np.exp(-fractal_strength * 0.5)
+r_smooth = r_deformed * (1 - roundness) + roundness * 1.0  # 1.0 ~ circle radius
+
+# --- Clip and convert to Cartesian coordinates ---
+r_smooth = np.clip(r_smooth, max_radius_iv * 1.3, None)
+x = r_smooth * np.cos(theta)
+y = r_smooth * np.sin(theta)
 
 # --- Plot setup ---
 fig = go.Figure()
 
-# Outer morphing shape
+# Outer biomorphic fractal shape
 fig.add_trace(
     go.Scatter(
         x=x,
@@ -45,12 +56,12 @@ fig.add_trace(
     )
 )
 
-# --- IV Chart (same as before) ---
+# --- IV Chart ---
 num_sections = 6
 num_vars = 9
 num_levels = 5
 
-# Concentric circles
+# Concentric rings
 for j in range(1, num_levels + 1):
     r_ring = max_radius_iv * (j / num_levels)
     theta_ring = np.linspace(0, 2 * np.pi, 200)
@@ -108,8 +119,8 @@ fig.add_trace(
 
 # --- Layout ---
 fig.update_layout(
-    width=500,  # 50% smaller as you asked
-    height=500,
+    width=700,
+    height=700,
     xaxis=dict(scaleanchor="y", visible=False),
     yaxis=dict(visible=False),
     showlegend=False,
