@@ -2,6 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
+import io
 
 st.set_page_config(layout="centered")
 st.title("Context-aware Tasting Diagram")
@@ -79,7 +80,7 @@ fig.add_trace(
         y=y,
         fill="toself",
         mode="lines",
-        line=dict(color="black", width=3),
+        line=dict(color="black", width=2),
         fillcolor="white",
         name="Outer shape",
     )
@@ -186,4 +187,16 @@ fig.update_layout(
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
+
+# Convert Plotly figure to a PNG image
+img_bytes = fig.to_image(format="png", width=1000, height=1000, scale=2)
+
+# Streamlit download button
+st.download_button(
+    label="📥 Download current image",
+    data=img_bytes,
+    file_name="tasting_diagram.png",
+    mime="image/png"
+)
 
