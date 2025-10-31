@@ -4,7 +4,7 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 st.set_page_config(layout="centered")
-st.title("Context-aware Tasting Diagram"
+st.title("Context-aware Tasting Diagram")
 
 # --- User input ---
 factor = st.slider("Amount of context (0 to 100)", 0, 100, 0)
