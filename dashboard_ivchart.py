@@ -2,59 +2,131 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 
-st.set_page_config(page_title="Square-to-Flower Morph", layout="centered")
+st.set_page_config(layout="centered")
+st.title("IV Chart Dashboard: Square → Organic Octagon Morph")
 
-st.title("🌀 Square to Flower Morph")
+# --- User input ---
+factor = st.slider("Morph Level (0 = Square, 100 = Organic Octagon)", 0, 100, 0)
+morph_strength = factor / 100  # normalized [0, 1]
 
-# Slider goes from 0–100 but scales to 0–3 internally
-flower_slider = st.slider("Flower Morph", 0, 100, 0)
-flower = 3 * (flower_slider / 100)
+# --- Constants ---
+num_points = 1500
+max_radius_iv = 0.5
+outer_base_radius = 1.0
+theta = np.linspace(0, 2 * np.pi, num_points)
 
-# Shape parameters
-theta = np.linspace(0, 2 * np.pi, 800)
-r_base = np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))  # Start as square
+# --- Helper: Polar radius for regular n-gon ---
+def polygon_radius(theta, n_sides):
+    return outer_base_radius / np.cos((np.pi / n_sides) - (theta % (2*np.pi / n_sides)))
 
-# Add rounded/octagonal morph
-round_factor = flower / 3  # between 0 and 1
-r_shape = ((r_base ** (1 - round_factor)) * (1 - round_factor) + 1 * round_factor)
+# --- Base (square) and target (octagon) shapes ---
+r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
+r_octagon = polygon_radius(theta, 8)
 
-# Add flower-like lobes (sinusoidal modulation)
-r_flower = r_shape * (1 + 0.1 * np.cos(4 * theta * (1 + flower)))
+# --- Interpolate between square and octagon ---
+r_morph = (1 - morph_strength) * r_square + morph_strength * r_octagon
 
-# Convert to Cartesian
-x = r_flower * np.cos(theta)
-y = r_flower * np.sin(theta)
+# --- Add repeating detail and smoothness ---
+# The “frequency” and “amplitude” of the surface modulation grow with morph_strength
+detail_freq = 4 + int(8 * morph_strength * 4)  # more repeating segments as morph increases
+detail_amp = 0.05 * morph_strength  # small ripples only
 
-# Make it 50% smaller
-x *= 0.5
-y *= 0.5
-
-# Plot the IV circle in the center (fixed size)
-circle_theta = np.linspace(0, 2 * np.pi, 200)
-circle_x = 0.15 * np.cos(circle_theta)
-circle_y = 0.15 * np.sin(circle_theta)
-
-fig = go.Figure()
-
-# Outer flower shape
-fig.add_trace(go.Scatter(x=x, y=y, mode='lines', fill='toself',
-                         line=dict(color='mediumorchid', width=3),
-                         fillcolor='lavender'))
-
-# Inner circle
-fig.add_trace(go.Scatter(x=circle_x, y=circle_y, mode='lines',
-                         line=dict(color='purple', width=2)))
-
-fig.update_layout(
-    showlegend=False,
-    xaxis=dict(visible=False),
-    yaxis=dict(visible=False),
-    width=500,
-    height=500,
-    margin=dict(l=0, r=0, t=0, b=0),
-    paper_bgcolor="white",
-    plot_bgcolor="white"
+# Smooth “organic” noise pattern using layered cosine waves
+r_detail = 1 + detail_amp * (
+    np.cos(detail_freq * theta)
+    + 0.3 * np.cos(2 * detail_freq * theta + np.pi / 3)
+    + 0.15 * np.cos(4 * detail_freq * theta + np.pi / 5)
 )
 
-st.plotly_chart(fig)
+r_final = r_morph * r_detail
+
+# --- Convert to Cartesian coordinates ---
+x = r_final * np.cos(theta)
+y = r_final * np.sin(theta)
+
+# --- Plot setup ---
+fig = go.Figure()
+
+# Outer morphing shape
+fig.add_trace(
+    go.Scatter(
+        x=x,
+        y=y,
+        fill="toself",
+        mode="lines",
+        line=dict(color="royalblue", width=3),
+        fillcolor="lightblue",
+        name="Outer shape",
+    )
+)
+
+# --- IV Chart (unchanged) ---
+num_sections = 6
+num_vars = 9
+num_levels = 5
+
+for j in range(1, num_levels + 1):
+    r_ring = max_radius_iv * (j / num_levels)
+    theta_ring = np.linspace(0, 2 * np.pi, 200)
+    fig.add_trace(
+        go.Scatter(
+            x=r_ring * np.cos(theta_ring),
+            y=r_ring * np.sin(theta_ring),
+            mode="lines",
+            line=dict(color="gray", width=1, dash="dot"),
+            showlegend=False,
+        )
+    )
+
+for i in range(num_sections):
+    angle = i * (2 * np.pi / num_sections)
+    fig.add_trace(
+        go.Scatter(
+            x=[0, max_radius_iv * np.cos(angle)],
+            y=[0, max_radius_iv * np.sin(angle)],
+            mode="lines",
+            line=dict(color="black", width=2),
+            showlegend=False,
+        )
+    )
+
+for i in range(num_sections):
+    start_angle = i * (2 * np.pi / num_sections)
+    end_angle = (i + 1) * (2 * np.pi / num_sections)
+    section_width = end_angle - start_angle
+    for v in range(1, num_vars + 1):
+        angle = start_angle + (v / (num_vars + 1)) * section_width
+        fig.add_trace(
+            go.Scatter(
+                x=[0, max_radius_iv * np.cos(angle)],
+                y=[0, max_radius_iv * np.sin(angle)],
+                mode="lines",
+                line=dict(color="lightgray", width=1),
+                showlegend=False,
+            )
+        )
+
+theta_circ = np.linspace(0, 2 * np.pi, 300)
+fig.add_trace(
+    go.Scatter(
+        x=max_radius_iv * np.cos(theta_circ),
+        y=max_radius_iv * np.sin(theta_circ),
+        mode="lines",
+        line=dict(color="black", width=3),
+        showlegend=False,
+    )
+)
+
+# --- Layout ---
+fig.update_layout(
+    width=500,
+    height=500,
+    xaxis=dict(scaleanchor="y", visible=False),
+    yaxis=dict(visible=False),
+    showlegend=False,
+    margin=dict(l=0, r=0, t=20, b=0),
+    plot_bgcolor="white",
+)
+
+st.plotly_chart(fig, use_container_width=True)
 
