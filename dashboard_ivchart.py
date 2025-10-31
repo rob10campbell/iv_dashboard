@@ -16,7 +16,7 @@ smooth_strength = 23 / 100  # fixed at your preferred roughness
 # --- Constants ---
 #num_points = 1500
 num_points = 8000
-max_radius_iv = 1#0.5
+max_radius_iv = 0.7 # percent of the total shape size
 outer_base_radius = 1.0
 theta = np.linspace(0, 2 * np.pi, num_points)
 
