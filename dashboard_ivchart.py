@@ -143,7 +143,7 @@ fig.add_trace(
 )
 
 # --- Center cover circle ---
-r_center = 0.1  # adjust this to make it bigger or smaller
+r_center = 0.2  # adjust this to make it bigger or smaller
 theta_center = np.linspace(0, 2 * np.pi, 200)
 x_center = r_center * np.cos(theta_center)
 y_center = r_center * np.sin(theta_center)
