@@ -142,6 +142,25 @@ fig.add_trace(
     )
 )
 
+# --- Center cover circle ---
+r_center = 0.08  # adjust this to make it bigger or smaller
+theta_center = np.linspace(0, 2 * np.pi, 200)
+x_center = r_center * np.cos(theta_center)
+y_center = r_center * np.sin(theta_center)
+
+fig.add_trace(
+    go.Scatter(
+        x=x_center,
+        y=y_center,
+        fill="toself",
+        mode="lines",
+        line=dict(color="black", width=1),
+        fillcolor="black",
+        showlegend=False,
+    )
+)
+
+
 # --- Layout ---
 fig.update_layout(
     width=300,
