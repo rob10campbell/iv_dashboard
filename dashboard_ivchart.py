@@ -19,6 +19,10 @@ num_points = 8000
 max_radius_iv = 0.8 # percent of the total shape size
 outer_base_radius = 1.0
 theta = np.linspace(0, 2 * np.pi, num_points)
+colors = [
+    "#e41a1c", "#377eb8", "#4daf4a", "#984ea3",
+    "#ff7f00", "#ffff33", "#a65628", "#f781bf", "#999999"
+]
 
 # --- Helper: Polar radius for regular n-gon ---
 def polygon_radius(theta, n_sides):
@@ -27,6 +31,11 @@ def polygon_radius(theta, n_sides):
 # --- Base shapes ---
 r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
 r_poly = polygon_radius(theta, 20)  # use 20 sides now
+
+# Scale outer shape slightly larger as sides increase
+scale_factor = 1 + 0.25 * morph_strength  # grows up to +25%
+r_poly *= scale_factor
+
 r_morph = (1 - morph_strength) * r_square + morph_strength * r_poly
 
 # --- Organic symmetric deformation ---
@@ -120,15 +129,19 @@ for i in range(num_sections):
     section_width = end_angle - start_angle
     for v in range(1, num_vars + 1):
         angle = start_angle + (v / (num_vars + 1)) * section_width
+        color = colors[(v - 1) % len(colors)]  # assign color
         fig.add_trace(
             go.Scatter(
                 x=[0, max_radius_iv * np.cos(angle)],
                 y=[0, max_radius_iv * np.sin(angle)],
                 mode="lines",
-                line=dict(color="black", width=0.8),
+                line=dict(color=color, width=1.2),
                 showlegend=False,
             )
         )
+
+
+
 
 ###### OUTER CIRCLE (i.e. max level)
 theta_circ = np.linspace(0, 2 * np.pi, 300)
@@ -154,7 +167,7 @@ fig.add_trace(
         y=y_center,
         fill="toself",
         mode="lines",
-        line=dict(color="black", width=1),
+        line=dict(color="black", width=2),
         fillcolor="white",
         showlegend=False,
     )
