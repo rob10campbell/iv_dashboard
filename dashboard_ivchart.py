@@ -14,7 +14,8 @@ morph_strength = factor / 100
 smooth_strength = 23 / 100  # fixed at your preferred roughness
 
 # --- Constants ---
-num_points = 1500
+#num_points = 1500
+num_points = 8000
 max_radius_iv = 0.5
 outer_base_radius = 1.0
 theta = np.linspace(0, 2 * np.pi, num_points)
@@ -35,7 +36,8 @@ base_freq = 20  # enforce 20-fold symmetry for "petals"
 # Controlled random noise (seeded)
 rng = np.random.default_rng(42)
 noise = rng.normal(0, 1, num_points)
-sigma = 2 + 60 * smooth_strength
+#sigma = 2 + 60 * smooth_strength
+sigma = 2 + 80 * smooth_strength
 noise_smooth = gaussian_filter1d(noise, sigma=sigma)
 noise_smooth /= np.max(np.abs(noise_smooth))
 
@@ -53,8 +55,12 @@ r_detail = 1 + detail_amp * (0.7 * harmonic + 0.3 * noise_smooth)
 r_final = r_morph * r_detail
 
 # --- Convert to Cartesian ---
-x = r_final * np.cos(theta)
-y = r_final * np.sin(theta)
+# (after r_final is built)
+r_final_smooth = gaussian_filter1d(r_final, sigma=3)
+x = r_final_smooth * np.cos(theta)
+y = r_final_smooth * np.sin(theta)
+#x = r_final * np.cos(theta)
+#y = r_final * np.sin(theta)
 
 # --- Plot ---
 fig = go.Figure()
