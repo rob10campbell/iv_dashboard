@@ -4,10 +4,10 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard: Square → Symmetric Organic 20-gon Morph")
+st.title("Context-aware Tasting Diagram"
 
 # --- User input ---
-factor = st.slider("Morph Level (0 = Square, 100 = Organic 20-gon)", 0, 100, 0)
+factor = st.slider("Amount of context (0 to 100)", 0, 100, 0)
 morph_strength = factor / 100
 
 # --- Fixed fractal smoothness ---
@@ -70,8 +70,8 @@ fig.add_trace(
         y=y,
         fill="toself",
         mode="lines",
-        line=dict(color="royalblue", width=3),
-        fillcolor="lightblue",
+        line=dict(color="black", width=3),
+        fillcolor="white",
         name="Outer shape",
     )
 )
@@ -81,6 +81,8 @@ num_sections = 6
 num_vars = 9
 num_levels = 5
 
+
+###### LEVELS for grading
 for j in range(1, num_levels + 1):
     r_ring = max_radius_iv * (j / num_levels)
     theta_ring = np.linspace(0, 2 * np.pi, 200)
@@ -89,25 +91,12 @@ for j in range(1, num_levels + 1):
             x=r_ring * np.cos(theta_ring),
             y=r_ring * np.sin(theta_ring),
             mode="lines",
-            line=dict(color="gray", width=1, dash="dot"),
+            line=dict(color="black", width=0.8, dash="dot"),
             showlegend=False,
         )
     )
 
-"""
-for i in range(num_sections):
-    angle = i * (2 * np.pi / num_sections)
-    fig.add_trace(
-        go.Scatter(
-            x=[0, max_radius_iv * np.cos(angle)],
-            y=[0, max_radius_iv * np.sin(angle)],
-            mode="lines",
-            line=dict(color="black", width=2),
-            showlegend=False,
-        )
-    )
-"""
-
+###### SECTIONS for steps in the tasting process
 for i in range(num_sections):
     angle = i * (2 * np.pi / num_sections)
     # Find the nearest angle in the theta array
@@ -124,6 +113,7 @@ for i in range(num_sections):
     )
 
 
+###### VARIABLES for notes in the tasting process
 for i in range(num_sections):
     start_angle = i * (2 * np.pi / num_sections)
     end_angle = (i + 1) * (2 * np.pi / num_sections)
@@ -135,18 +125,19 @@ for i in range(num_sections):
                 x=[0, max_radius_iv * np.cos(angle)],
                 y=[0, max_radius_iv * np.sin(angle)],
                 mode="lines",
-                line=dict(color="lightgray", width=1),
+                line=dict(color="black", width=0.8),
                 showlegend=False,
             )
         )
 
+###### OUTER CIRCLE (i.e. max level)
 theta_circ = np.linspace(0, 2 * np.pi, 300)
 fig.add_trace(
     go.Scatter(
         x=max_radius_iv * np.cos(theta_circ),
         y=max_radius_iv * np.sin(theta_circ),
         mode="lines",
-        line=dict(color="black", width=3),
+        line=dict(color="black", width=0.8),
         showlegend=False,
     )
 )
