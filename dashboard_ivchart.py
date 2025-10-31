@@ -16,7 +16,7 @@ smooth_strength = 23 / 100  # fixed at your preferred roughness
 # --- Constants ---
 #num_points = 1500
 num_points = 8000
-max_radius_iv = 0.7 # percent of the total shape size
+max_radius_iv = 0.8 # percent of the total shape size
 outer_base_radius = 1.0
 theta = np.linspace(0, 2 * np.pi, num_points)
 
@@ -79,7 +79,7 @@ fig.add_trace(
 # --- IV Chart (unchanged) ---
 num_sections = 6
 num_vars = 9
-num_levels = 5
+num_levels = 6
 
 
 ###### LEVELS for grading
@@ -143,7 +143,7 @@ fig.add_trace(
 )
 
 # --- Center cover circle ---
-r_center = 0.08  # adjust this to make it bigger or smaller
+r_center = 0.1  # adjust this to make it bigger or smaller
 theta_center = np.linspace(0, 2 * np.pi, 200)
 x_center = r_center * np.cos(theta_center)
 y_center = r_center * np.sin(theta_center)
