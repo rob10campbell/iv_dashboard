@@ -3,44 +3,35 @@ import plotly.graph_objects as go
 import numpy as np
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard with Fractal Deformation")
+st.title("IV Chart Dashboard with Subtle Organic Deformation")
 
 # --- User input: deformation factor ---
-factor = st.slider("Deformation Level (Complexity)", 0, 10, 0)
+factor = st.slider("Deformation Level", 0, 10, 0)
 
 # --- Constants ---
-num_points = 500
-max_radius_iv = 0.5   # radius of IV chart
-outer_base_radius = 1.0
+num_points = 400
+max_radius_iv = 0.5   # radius of IV chart (constant inner circle)
+outer_base_radius = 1.0  # base half-width of square
 
+# --- 1. Generate square boundary (parametric form) ---
 theta = np.linspace(0, 2 * np.pi, num_points)
 r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
 
-# --- Fractal-like deformation function ---
-def fractal_radius(theta, base_r, amplitude, levels, seed=0):
-    np.random.seed(seed)
-    r = np.zeros_like(theta)
-    for n in range(levels):
-        freq = 2 ** n
-        phase = np.random.uniform(0, 2 * np.pi)
-        r += (np.sin(freq * theta + phase) / (2 ** n))
-    r = base_r + amplitude * r / np.max(np.abs(r))
-    return r
+# --- 2. Apply subtle, high-frequency deformation ---
+# Small amplitude, frequency increases with factor
+amplitude = 0.03  # 3% radial perturbation
+frequency = 4 + factor  # from 4 ripples to 14 at slider max
 
-# Deformation: number of levels increases with slider
-amplitude = 0.03
-levels = max(1, factor)  # 1–10 fractal layers
-r_deformed = fractal_radius(theta, r_square, amplitude, levels)
-
-# Keep shape within reasonable size
+r_deformed = r_square + amplitude * np.sin(frequency * theta)
 r_deformed = np.clip(r_deformed, max_radius_iv * 1.3, None)
+
 x = r_deformed * np.cos(theta)
 y = r_deformed * np.sin(theta)
 
-# --- Plot setup ---
+# --- 3. Create Plotly figure ---
 fig = go.Figure()
 
-# Outer fractal shape
+# Outer deformed square
 fig.add_trace(
     go.Scatter(
         x=x,
@@ -52,7 +43,7 @@ fig.add_trace(
     )
 )
 
-# --- IV Chart ---
+# --- 4. IV Chart ---
 num_sections = 6
 num_vars = 9
 num_levels = 5
@@ -101,7 +92,7 @@ for i in range(num_sections):
             )
         )
 
-# Outer boundary
+# Outer boundary of IV chart
 theta_circ = np.linspace(0, 2 * np.pi, 300)
 fig.add_trace(
     go.Scatter(
@@ -113,7 +104,7 @@ fig.add_trace(
     )
 )
 
-# --- Layout ---
+# --- 5. Layout ---
 fig.update_layout(
     width=700,
     height=700,
