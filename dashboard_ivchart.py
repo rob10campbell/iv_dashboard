@@ -94,6 +94,7 @@ for j in range(1, num_levels + 1):
         )
     )
 
+"""
 for i in range(num_sections):
     angle = i * (2 * np.pi / num_sections)
     fig.add_trace(
@@ -105,6 +106,23 @@ for i in range(num_sections):
             showlegend=False,
         )
     )
+"""
+
+for i in range(num_sections):
+    angle = i * (2 * np.pi / num_sections)
+    # Find the nearest angle in the theta array
+    idx = (np.abs(theta - angle)).argmin()
+    r_edge = r_final_smooth[idx]  # the current outer boundary radius
+    fig.add_trace(
+        go.Scatter(
+            x=[0, r_edge * np.cos(angle)],
+            y=[0, r_edge * np.sin(angle)],
+            mode="lines",
+            line=dict(color="black", width=2),
+            showlegend=False,
+        )
+    )
+
 
 for i in range(num_sections):
     start_angle = i * (2 * np.pi / num_sections)
