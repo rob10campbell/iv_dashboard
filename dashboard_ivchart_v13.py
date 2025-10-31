@@ -1,10 +1,9 @@
 import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
-from scipy.ndimage import gaussian_filter1d
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard: Square → Smooth Organic Octagon Morph")
+st.title("IV Chart Dashboard: Square → Organic Octagon Morph")
 
 # --- User input ---
 factor = st.slider("Morph Level (0 = Square, 100 = Organic Octagon)", 0, 100, 0)
@@ -27,27 +26,19 @@ r_octagon = polygon_radius(theta, 8)
 # --- Interpolate between square and octagon ---
 r_morph = (1 - morph_strength) * r_square + morph_strength * r_octagon
 
-# --- Add smooth organic deformation ---
-# Gentle, evolving organic ripples
-base_freq = 3 + 3 * morph_strength
-detail_amp = 0.04 * morph_strength
+# --- Add repeating detail and smoothness ---
+# The “frequency” and “amplitude” of the surface modulation grow with morph_strength
+detail_freq = 4 + int(8 * morph_strength * 4)  # more repeating segments as morph increases
+detail_amp = 0.05 * morph_strength  # small ripples only
 
-# Create low-frequency cosine wave
-smooth_wave = np.cos(base_freq * theta) + 0.4 * np.sin(1.7 * base_freq * theta + np.pi / 4)
+# Smooth “organic” noise pattern using layered cosine waves
+r_detail = 1 + detail_amp * (
+    np.cos(detail_freq * theta)
+    + 0.3 * np.cos(2 * detail_freq * theta + np.pi / 3)
+    + 0.15 * np.cos(4 * detail_freq * theta + np.pi / 5)
+)
 
-# Add gentle random noise (seeded for consistency)
-rng = np.random.default_rng(42)
-noise = rng.normal(0, 1, num_points)
-noise = gaussian_filter1d(noise, sigma=30)  # smooth the noise
-
-# Combine to make organic field
-r_detail = 1 + detail_amp * (0.6 * smooth_wave + 0.4 * noise / np.max(np.abs(noise)))
-
-# Apply detail
 r_final = r_morph * r_detail
-
-# --- Final smoothing of the contour ---
-r_final = gaussian_filter1d(r_final, sigma=8)
 
 # --- Convert to Cartesian coordinates ---
 x = r_final * np.cos(theta)
