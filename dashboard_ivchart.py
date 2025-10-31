@@ -155,7 +155,7 @@ fig.add_trace(
         fill="toself",
         mode="lines",
         line=dict(color="black", width=1),
-        fillcolor="black",
+        fillcolor="white",
         showlegend=False,
     )
 )
