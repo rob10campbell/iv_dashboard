@@ -4,13 +4,11 @@ import numpy as np
 from scipy.ndimage import gaussian_filter1d
 
 st.set_page_config(layout="centered")
-st.title("IV Chart Dashboard: Square → Organic Octagon Morph")
+st.title("IV Chart Dashboard: Square → Smooth Organic Octagon Morph")
 
 # --- User input ---
 factor = st.slider("Morph Level (0 = Square, 100 = Organic Octagon)", 0, 100, 0)
-smoothness = st.slider("Fractal Smoothness", 0, 100, 50)  # new control
-morph_strength = factor / 100
-smooth_strength = smoothness / 100
+morph_strength = factor / 100  # normalized [0, 1]
 
 # --- Constants ---
 num_points = 1500
@@ -22,47 +20,43 @@ theta = np.linspace(0, 2 * np.pi, num_points)
 def polygon_radius(theta, n_sides):
     return outer_base_radius / np.cos((np.pi / n_sides) - (theta % (2*np.pi / n_sides)))
 
-# --- Base shapes ---
+# --- Base (square) and target (octagon) shapes ---
 r_square = outer_base_radius / np.maximum(np.abs(np.cos(theta)), np.abs(np.sin(theta)))
 r_octagon = polygon_radius(theta, 8)
+
+# --- Interpolate between square and octagon ---
 r_morph = (1 - morph_strength) * r_square + morph_strength * r_octagon
 
-# --- Organic “fractal” deformation ---
+# --- Add smooth organic deformation ---
+# Gentle, evolving organic ripples
 base_freq = 3 + 3 * morph_strength
-detail_amp = 0.05 * morph_strength
+detail_amp = 0.04 * morph_strength
 
-# Random layered noise
+# Create low-frequency cosine wave
+smooth_wave = np.cos(base_freq * theta) + 0.4 * np.sin(1.7 * base_freq * theta + np.pi / 4)
+
+# Add gentle random noise (seeded for consistency)
 rng = np.random.default_rng(42)
-noise = (
-    0.6 * rng.normal(0, 1, num_points)
-    + 0.3 * np.sin(2.3 * theta)
-    + 0.1 * np.cos(7.1 * theta + np.pi / 3)
-)
+noise = rng.normal(0, 1, num_points)
+noise = gaussian_filter1d(noise, sigma=30)  # smooth the noise
 
-# Smooth based on smoothness slider
-# low smooth_strength → rough / fractal
-# high smooth_strength → soft / smooth
-sigma = 2 + 60 * smooth_strength  # gaussian blur width
-noise_smooth = gaussian_filter1d(noise, sigma=sigma)
+# Combine to make organic field
+r_detail = 1 + detail_amp * (0.6 * smooth_wave + 0.4 * noise / np.max(np.abs(noise)))
 
-# Normalize
-noise_smooth /= np.max(np.abs(noise_smooth))
-
-# Combine waves + noise for “organic veins”
-r_detail = 1 + detail_amp * (
-    0.5 * np.cos(base_freq * theta)
-    + 0.25 * np.sin(1.7 * base_freq * theta + np.pi / 4)
-    + 0.25 * noise_smooth
-)
-
+# Apply detail
 r_final = r_morph * r_detail
 
-# --- Convert to Cartesian ---
+# --- Final smoothing of the contour ---
+r_final = gaussian_filter1d(r_final, sigma=8)
+
+# --- Convert to Cartesian coordinates ---
 x = r_final * np.cos(theta)
 y = r_final * np.sin(theta)
 
-# --- Plot ---
+# --- Plot setup ---
 fig = go.Figure()
+
+# Outer morphing shape
 fig.add_trace(
     go.Scatter(
         x=x,
