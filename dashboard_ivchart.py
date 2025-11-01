@@ -676,7 +676,7 @@ for i, icon_path in enumerate(section_icons):
     )
 
 
-st.plotly_chart(fig, use_container_width=False) # False for left-adjusted, True for centered
+st.plotly_chart(fig, width='stretch') # False for left-adjusted, True for centered
 
 
 # --- Download Button ---
