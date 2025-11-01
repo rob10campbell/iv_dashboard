@@ -2,7 +2,11 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
+import plotly.io as pio
+import streamlit as st
 import io
+
+
 
 st.set_page_config(layout="wide")
 st.title("Coffee Cupping")
@@ -680,6 +684,28 @@ st.plotly_chart(fig, width='stretch') # False for left-adjusted, True for center
 
 
 # --- Download Button ---
-img_bytes = fig.to_image(format="png", width=1000, height=1000, scale=2)
-st.download_button("📥 Download current image", img_bytes, "tasting_diagram.png", "image/png")
+#img_bytes = fig.to_image(format="png", width=1000, height=1000, scale=2)
+#st.download_button("📥 Download current image", img_bytes, "tasting_diagram.png", "image/png")
+
+# Safely try to export PNG
+try:
+    img_bytes = fig.to_image(format="png", width=1000, height=1000, scale=2)
+    st.download_button(
+        label="📥 Download PNG",
+        data=img_bytes,
+        file_name=f"{coffee_name or 'chart'}.png",
+        mime="image/png"
+    )
+except Exception as e:
+    st.warning("⚠️ PNG export unavailable — falling back to interactive HTML download.")
+
+    # Fallback: download HTML instead of image
+    html_bytes = pio.to_html(fig, full_html=False, include_plotlyjs="cdn").encode("utf-8")
+    st.download_button(
+        label="📥 Download Interactive HTML",
+        data=html_bytes,
+        file_name=f"{coffee_name or 'chart'}.html",
+        mime="text/html"
+    )
+
 
