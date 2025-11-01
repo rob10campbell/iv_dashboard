@@ -3,7 +3,6 @@ import plotly.graph_objects as go
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 import io
-import base64
 
 st.set_page_config(layout="wide")
 st.title("Context-aware Tasting Diagram")
@@ -556,29 +555,69 @@ st.markdown("""
 
 
 # --- ICONS ---
-def encode_image(path):
-    """Return a base64-encoded image string for Plotly."""
-    with open(path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
-    return f"data:image/png;base64,{encoded}"
-
 section_icons = [
-    "icons/1beans.png",
-    "icons/2grind.png",
-    "icons/3wet.png", 
-    "icons/4crust.png",
-    "icons/5clear.png",
-    "icons/6wait.png", 
-    "icons/7slurp.png",
-    "icons/8chat.png"
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/2grind.png",
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/3wet.png", 
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/4crust.png",
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/5clearwait.png",
+    #"https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/6wait.png", 
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/6slurp.png",
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/7chat.png",
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/1bean.png"
 ]
 
-# radius at which icons should be placed
-icon_radius = 1.35  # slightly outside outer_base_radius
 
 for i, icon_path in enumerate(section_icons):
-    # compute angle roughly at middle of section i (clockwise layout)
-    theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+    if i == 0:
+      icon_radius = 1.2  # slightly outside outer_base_radius
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+      size_x = 0.25
+      size_y = 0.25
+    elif i == 1:
+      icon_radius = 1.08  # slightly outside outer_base_radius
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
+      size_x = 0.5
+      size_y = 0.5
+    elif i == 2:
+      icon_radius = 1.1  # slightly outside outer_base_radius   
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.25) # top
+      size_x = 0.5
+      size_y = 0.5
+    elif i == 3:
+      icon_radius = 1.05  # slightly outside outer_base_radius
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.15) # top
+      size_x = 0.25
+      size_y = 0.25
+    #elif i == 4:
+    #  icon_radius = 1.05  # slightly outside outer_base_radius
+    #  #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+    #  #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
+    #  theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.50) # top
+    #  size_x = 0.25
+    #  size_y = 0.25
+    elif i == 4:
+      icon_radius = 1.1  # slightly outside outer_base_radius
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.3) # top
+      size_x = 0.25
+      size_y = 0.25
+    elif i == 5:
+      icon_radius = 1.1  # slightly outside outer_base_radius
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.3) # top
+      size_x = 0.25
+      size_y = 0.25
+    elif i == 6:
+      icon_radius = 1.1  # slightly outside outer_base_radius
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
+      #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.7) # top
+      size_x = 0.25
+      size_y = 0.25
     x_icon = icon_radius * np.cos(theta_mid)
     y_icon = icon_radius * np.sin(theta_mid)
 
@@ -589,8 +628,8 @@ for i, icon_path in enumerate(section_icons):
             yref="y",
             x=x_icon,
             y=y_icon,
-            sizex=0.25,  # adjust for icon scale
-            sizey=0.25,
+            sizex=size_x,  # adjust for icon scale
+            sizey=size_y,
             xanchor="center",
             yanchor="middle",
             layer="above"
