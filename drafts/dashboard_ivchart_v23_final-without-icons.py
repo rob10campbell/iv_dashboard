@@ -3,7 +3,6 @@ import plotly.graph_objects as go
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
 import io
-import base64
 
 st.set_page_config(layout="wide")
 st.title("Context-aware Tasting Diagram")
@@ -553,49 +552,6 @@ st.markdown("""
         }
     </style>
 """, unsafe_allow_html=True)
-
-
-# --- ICONS ---
-def encode_image(path):
-    """Return a base64-encoded image string for Plotly."""
-    with open(path, "rb") as f:
-        encoded = base64.b64encode(f.read()).decode()
-    return f"data:image/png;base64,{encoded}"
-
-section_icons = [
-    "icons/1beans.png",
-    "icons/2grind.png",
-    "icons/3wet.png", 
-    "icons/4crust.png",
-    "icons/5clear.png",
-    "icons/6wait.png", 
-    "icons/7slurp.png",
-    "icons/8chat.png"
-]
-
-# radius at which icons should be placed
-icon_radius = 1.35  # slightly outside outer_base_radius
-
-for i, icon_path in enumerate(section_icons):
-    # compute angle roughly at middle of section i (clockwise layout)
-    theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
-    x_icon = icon_radius * np.cos(theta_mid)
-    y_icon = icon_radius * np.sin(theta_mid)
-
-    fig.add_layout_image(
-        dict(
-            source=icon_path,
-            xref="x",
-            yref="y",
-            x=x_icon,
-            y=y_icon,
-            sizex=0.25,  # adjust for icon scale
-            sizey=0.25,
-            xanchor="center",
-            yanchor="middle",
-            layer="above"
-        )
-    )
 
 
 st.plotly_chart(fig, use_container_width=False) # False for left-adjusted, True for centered

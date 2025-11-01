@@ -3,4 +3,5 @@ plotly
 scipy
 numpy
 pandas
+noise
 io
