@@ -5,7 +5,7 @@ from scipy.ndimage import gaussian_filter1d
 import io
 
 st.set_page_config(layout="wide")
-st.title("Context-aware Tasting Diagram")
+st.title("Coffee Cupping")
 
 # --- Sidebar tabs ---
 tab1, tab2, tab3, tab4, tab5, tab6  = st.sidebar.tabs(["Origin", "Beans", "Grind", "Wet", "Crust", "Taste"])
@@ -21,7 +21,12 @@ context_labels = [ "Origin", "Process", "Roast", "Grower", "Grower details",
                    "Roaster", "Roaster details", "Where purchased", "Retail details", "Other" 
 ]
 with tab1:
-    st.subheader("Context about this coffee")
+    st.subheader("About this coffee")
+
+    # --- NEW: Coffee Name input ---
+    coffee_name = st.text_input("Coffee Name", key="coffee_name")
+    #st.session_state.coffee_name = coffee_name  # store for access later
+
     st.write("Fill in up to 10 fields") # (each filled box adds 10 points)
 
     # Create 10 text fields
@@ -169,7 +174,7 @@ for i in range(num_sections):
                 ))
 
             # label via annotation (outside the ring)
-            label_r = max_radius_iv * 1.13
+            label_r = max_radius_iv * 1.14
             label_x = label_r * np.cos(angle)
             label_y = label_r * np.sin(angle)
             #lbl = bean_labels[len(bean_labels) - v] if (len(bean_labels) - v) < len(bean_labels) else f"S1-{v}"
@@ -179,7 +184,7 @@ for i in range(num_sections):
                 text_angle += 180
             fig.add_annotation(
                 x=label_x, y=label_y, text=lbl, showarrow=False,
-                font=dict(color="black", size=11), xanchor="center", yanchor="middle",
+                font=dict(color="black", size=12), xanchor="center", yanchor="middle",
                 textangle=-text_angle
             )
 
@@ -228,7 +233,7 @@ for i in range(num_sections):
             ))
 
         # label (annotation)
-        label_r = max_radius_iv * 1.13
+        label_r = max_radius_iv * 1.14
         label_x = label_r * np.cos(angle)
         label_y = label_r * np.sin(angle)
         lbl = notes[(v - 1) % len(notes)]
@@ -238,7 +243,7 @@ for i in range(num_sections):
             text_angle += 180
         fig.add_annotation(
             x=label_x, y=label_y, text=lbl, showarrow=False,
-            font=dict(color=color, size=11),
+            font=dict(color=color, size=12),
             xanchor="center", yanchor="middle", textangle=-text_angle
         )
 
@@ -534,6 +539,38 @@ fig.add_trace(go.Scatter(
     x=x_center, y=y_center, fill="toself", mode="lines",
     line=dict(color="black", width=2), fillcolor="white", showlegend=False))
 
+# --- Display coffee name in the center ---
+# --- Safely read the coffee name from session_state (if it exists) ---
+coffee_name = st.session_state.get("coffee_name", "")
+coffee_name = coffee_name.strip() if coffee_name else ""
+
+if coffee_name:
+    # --- Auto-insert line breaks every ~15 characters between words ---
+    words = coffee_name.split()
+    lines = []
+    current_line = ""
+    for word in words:
+        if len(current_line + " " + word) <= 8:
+            current_line += (" " if current_line else "") + word
+        else:
+            lines.append(current_line)
+            current_line = word
+    if current_line:
+        lines.append(current_line)
+    wrapped_name = "<br>".join(lines)
+
+    # --- Add wrapped name annotation ---
+    fig.add_annotation(
+        x=0, y=0,
+        text=wrapped_name,
+        showarrow=False,
+        font=dict(size=11, color="black", family="Arial Black"),
+        xanchor="center", yanchor="middle"
+    )
+
+
+
+# --- Final image size ---
 fig.update_layout(
     width=700, height=700,
     xaxis=dict(scaleanchor="y", visible=False),
@@ -542,6 +579,8 @@ fig.update_layout(
     margin=dict(l=0, r=0, t=20, b=0),
     plot_bgcolor="white",
 )
+
+
 
 # --- Sidebar formatting ---
 st.markdown("""
@@ -568,56 +607,56 @@ section_icons = [
 
 
 for i, icon_path in enumerate(section_icons):
-    if i == 0:
-      icon_radius = 1.2  # slightly outside outer_base_radius
+    if i == 0: # grind
+      icon_radius = 1.16 
       theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
-      size_x = 0.25
-      size_y = 0.25
-    elif i == 1:
-      icon_radius = 1.08  # slightly outside outer_base_radius
-      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
-      size_x = 0.5
-      size_y = 0.5
-    elif i == 2:
-      icon_radius = 1.1  # slightly outside outer_base_radius   
-      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.25) # top
-      size_x = 0.5
-      size_y = 0.5
-    elif i == 3:
-      icon_radius = 1.05  # slightly outside outer_base_radius
+      size_x = 0.28
+      size_y = 0.28
+    elif i == 1: # wet
+      icon_radius = 1.1
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.25) # bottom
+      size_x = 0.32
+      size_y = 0.32
+    elif i == 2: # crust
+      icon_radius = 1.23
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.35) # top
+      size_x = 0.43
+      size_y = 0.43
+    elif i == 3: # clear+wait
+      icon_radius = 1  # slightly outside outer_base_radius
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
-      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.15) # top
-      size_x = 0.25
-      size_y = 0.25
+      theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.25) # top
+      size_x = 0.43
+      size_y = 0.43
     #elif i == 4:
-    #  icon_radius = 1.05  # slightly outside outer_base_radius
+    #  icon_radius = 1.05
     #  #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
     #  #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
     #  theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.50) # top
     #  size_x = 0.25
     #  size_y = 0.25
-    elif i == 4:
-      icon_radius = 1.1  # slightly outside outer_base_radius
+    elif i == 4: # slurp
+      icon_radius = 1.2  # slightly outside outer_base_radius
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
       theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.3) # top
-      size_x = 0.25
-      size_y = 0.25
-    elif i == 5:
-      icon_radius = 1.1  # slightly outside outer_base_radius
+      size_x = 0.33
+      size_y = 0.33
+    elif i == 5: # chat
+      icon_radius = 1.11  # slightly outside outer_base_radius
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
       theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.3) # top
-      size_x = 0.25
-      size_y = 0.25
-    elif i == 6:
-      icon_radius = 1.1  # slightly outside outer_base_radius
+      size_x = 0.24
+      size_y = 0.24
+    elif i == 6: # bean
+      icon_radius = 1.18  # slightly outside outer_base_radius
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle / 2)
       #theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * 0.75) # bottom
       theta_mid = -i * (2 * np.pi / num_sections) - (base_angle * -0.7) # top
-      size_x = 0.25
-      size_y = 0.25
+      size_x = 0.18
+      size_y = 0.18
     x_icon = icon_radius * np.cos(theta_mid)
     y_icon = icon_radius * np.sin(theta_mid)
 
