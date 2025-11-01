@@ -561,8 +561,8 @@ section_icons = [
     "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/4crust.png",
     "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/5clearwait.png",
     #"https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/6wait.png", 
-    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/6slurp.png",
-    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/7chat.png",
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/7slurp.png",
+    "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/8chat.png",
     "https://raw.githubusercontent.com/rob10campbell/iv_dashboard/main/icons/1bean.png"
 ]
 
