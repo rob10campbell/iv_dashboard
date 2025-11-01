@@ -190,13 +190,13 @@ st.plotly_chart(fig, use_container_width=True)
 
 
 # Convert Plotly figure to a PNG image
-img_bytes = fig.to_image(format="png", width=1000, height=1000, scale=2)
+#img_bytes = fig.to_image(format="png", width=1000, height=1000, scale=2)
 
 # Streamlit download button
-st.download_button(
-    label="📥 Download current image",
-    data=img_bytes,
-    file_name="tasting_diagram.png",
-    mime="image/png"
-)
+#st.download_button(
+#    label="📥 Download current image",
+#    data=img_bytes,
+#    file_name="tasting_diagram.png",
+#    mime="image/png"
+#)
 
