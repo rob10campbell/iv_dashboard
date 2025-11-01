@@ -2,7 +2,7 @@ import streamlit as st
 import plotly.graph_objects as go
 import numpy as np
 from scipy.ndimage import gaussian_filter1d
-import io
+#import io
 
 st.set_page_config(layout="centered")
 st.title("Context-aware Tasting Diagram")
