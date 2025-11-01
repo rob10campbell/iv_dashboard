@@ -4,4 +4,5 @@ scipy>=1.13.0
 numpy>=1.26.0
 pandas>=2.2.0
 noise>=1.2.2
+kaleido>=0.2.1
 
