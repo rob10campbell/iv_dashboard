@@ -2,7 +2,7 @@
 ARTG5620 Project 2 Mockup
 
 
-[![Streamlit App](https://img.shields.io/badge/🚀%20Try%20it%20on-Streamlit-red?logo=streamlit)](https://ivdashboard.streamlit.app/)
+[![Streamlit App](https://img.shields.io/badge/🚀%20Try%20it%20on-Streamlit-red?logo=streamlit)](https://coffee-cupping-notation.streamlit.app/)
 
 
 NOTE: Image files cannot be downloaded from Streamlit Cloud. To use the download feature, run locally with 
